@@ -3030,12 +3030,30 @@ BEGIN
 END
 GO
 
-
-
 --new setting
 IF NOT EXISTS (SELECT 1 FROM [Setting] WHERE [name] = N'commonsettings.sitemapcustomurls')
 BEGIN
 	INSERT [Setting] ([Name], [Value], [StoreId])
 	VALUES (N'commonsettings.sitemapcustomurls', N'', 0)
+END
+GO
+
+--new column
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id=object_id('[Order]') and NAME='RewardPointsHistoryEntryId')
+BEGIN
+	ALTER TABLE [Order]
+	ADD [RewardPointsHistoryEntryId] int NULL
+END
+GO
+
+UPDATE [Order]
+SET [RewardPointsHistoryEntryId] = 0
+WHERE [RewardPointsWereAdded] = 1
+GO
+
+--drop column
+IF EXISTS (SELECT 1 FROM sys.columns WHERE object_id=object_id('[Order]') and NAME='RewardPointsWereAdded')
+BEGIN
+	ALTER TABLE [Order] DROP COLUMN [RewardPointsWereAdded]
 END
 GO
